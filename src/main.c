@@ -1,5 +1,4 @@
 #include "config.h"
-#include "random.h"
 #include "vec_oper.h"
 #include "timer.h"
 #include "matrix.h"
@@ -16,7 +15,12 @@ int main(int argc, char** argv) {
   const uint32_t arr_size = ARRAY_SIZE;
   const uint32_t cycles   = CYCLES;
 
-  arr_t **mat1, **mat2, **out; 
+  arr_t **mat1 = malloc(arr_size * sizeof(arr_t*)),
+        **mat2 = malloc(arr_size * sizeof(arr_t*)),
+        **out  = malloc(arr_size * sizeof(arr_t*));
+  MatInit(mat1, arr_size);
+  MatInit(mat2, arr_size);
+  MatInit(out, arr_size);
 
   float sum_time = 0.0, dif_time = 0.0,
         mul_time = 0.0, div_time = 0.0; 
@@ -39,7 +43,7 @@ int main(int argc, char** argv) {
       RandMat(mat1, arr_size, MIN_RAND, MAX_RAND);
 
     if(rank == 1)
-      RandMat(mat2, arr_size, MIN_RAND, MAX_RAND); 
+      RandMat(mat2, arr_size, MIN_RAND, MAX_RAND);
 
     MPI_BROADCAST(mat1, arr_size, rank, 0, size);
     MPI_BROADCAST(mat2, arr_size, rank, 1, size);
@@ -67,19 +71,23 @@ int main(int argc, char** argv) {
          arr_size, cycles, sizeof(arr_t));
 
   for(uint32_t i=0; i<cycles; ++i) {
-    Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
-    Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
+    RandMat(mat1, arr_size, MIN_RAND, MAX_RAND);
+    RandMat(mat2, arr_size, MIN_RAND, MAX_RAND);
 
-    ADDTIME_COR(Summ, sum_time, cycles, arr1, arr2, out, arr_size);
-    ADDTIME_COR(Diff, dif_time, cycles, arr1, arr2, out, arr_size);
-    ADDTIME_COR(Mult, mul_time, cycles, arr1, arr2, out, arr_size);
-    ADDTIME_COR(Div, div_time, cycles, arr1, arr2, out, arr_size);
+    ADDTIME_COR(MatPerformOper, sum_time, cycles, mat1, mat2, out, arr_size, Sum);
+    ADDTIME_COR(MatPerformOper, dif_time, cycles, mat1, mat2, out, arr_size, Dif);
+    ADDTIME_COR(MatPerformOper, mul_time, cycles, mat1, mat2, out, arr_size, Mul);
+    ADDTIME_COR(MatPerformOper, div_time, cycles, mat1, mat2, out, arr_size, Div);
   }
 
   printf("Serial execution:\n\tSum:\t%f\n\tDif:\t%f\n\tMul:\t%f\n\tDiv:\t%f\n",
          sum_time, dif_time, mul_time, div_time);
 
   #endif
+
+  MatDeinit(mat1, arr_size);
+  MatDeinit(mat2, arr_size);
+  MatDeinit(out, arr_size);
 
   return 0;
 }

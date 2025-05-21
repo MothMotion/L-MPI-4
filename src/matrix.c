@@ -7,11 +7,7 @@
 
 #include <mpi.h>
 
-uint8_t MatInit(arr_t** mat, const uint32_t size) {
-  mat = malloc(size * sizeof(void*));
-  if(!mat)
-    return 0;
-
+uint8_t MatInit(arr_t** mat, const uint32_t size) { 
   for(uint32_t i=0; i<size; ++i) {
     mat[i] = malloc(size * sizeof(arr_t));
     if(!mat[i])
