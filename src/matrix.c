@@ -4,19 +4,20 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include <mpi.h>
 
-void MatInit(arr_t** mat, const uint32_t size) {
+uint8_t MatInit(arr_t** mat, const uint32_t size) {
+  mat = malloc(size * sizeof(void*));
+  if(!mat)
+    return 0;
+
   for(uint32_t i=0; i<size; ++i) {
     mat[i] = malloc(size * sizeof(arr_t));
-    if(!mat[i]) {
-      printf("ERROR: failed to allocate memory!\n");
-      exit(-1);
-    }
-    Randomize(mat[i], size, MIN_RAND, MAX_RAND);
+    if(!mat[i])
+      return 0;
   }
+  return 1;
 }
 
 void MatDeinit(arr_t** mat, const uint32_t size) {
@@ -26,7 +27,7 @@ void MatDeinit(arr_t** mat, const uint32_t size) {
 }
 
 void MatPerformOper(arr_t** mat1, arr_t** mat2, arr_t** out, const uint32_t size,
-                 void* op(arr_t*, arr_t*, arr_t*, const uint32_t)) {
+                 void op(arr_t*, arr_t*, arr_t*, const uint32_t)) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
     op(mat1[i], mat2[i], out[i], size);
@@ -41,4 +42,9 @@ void MatPerformOper(arr_t** mat1, arr_t** mat2, arr_t** out, const uint32_t size
     op(mat1[i], mat2[i], out[i], size);
 
   #endif
+}
+
+void RandMat(arr_t** mat, const uint32_t size, const arr_t min_v, const arr_t max_v) {
+  for(uint32_t i=0; i<size; ++i)
+    Randomize(mat[i], size, min_v, max_v);
 }

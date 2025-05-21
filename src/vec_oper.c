@@ -5,7 +5,7 @@
 
 #include <mpi.h>
 
-void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
+void Sum(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
     arr_out[i] = arr1[i] + arr2[i];
@@ -24,7 +24,7 @@ void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #endif
 }
 
-void Diff(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
+void Dif(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
     arr_out[i] = arr1[i] - arr2[i];
@@ -43,7 +43,7 @@ void Diff(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #endif
 }
 
-void Mult(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
+void Mul(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
     arr_out[i] = arr1[i] * arr2[i];
