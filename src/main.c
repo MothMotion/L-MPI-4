@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
   uint32_t width = arr_size / size + (arr_size % size) ? 1 : 0;
   
   if(rank == 0)
-    printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n\tCORES_AMOUNT:\t%d\n",
+    printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n\tTHREADS_AMOUNT:\t%d\n",
            arr_size, cycles, sizeof(arr_t), size);
 
   for(uint32_t i=0; i<cycles; ++i) {
