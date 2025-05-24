@@ -8,29 +8,26 @@
 
 #include <mpi.h>
 
+#define RANKED_SIZE MIN(width, mat_size - rank*width)
 
-// its so f horrendous
-#define MPI_SYNC(mat, mat_size, rank, mpi_size, width) {\
-  for(uint32_t cur_r=0; cur_r<mpi_size; ++cur_r)\
-    for(uint32_t i=cur_r*width; i<(cur_r+1)*width && i<mat_size; ++i)\
-      if(cur_r == rank) {\
-        for(uint32_t j=0; j<mpi_size; ++j)\
-          if(j != rank)\
-            MPI_Send(mat[i], mat_size, MPI_UNSIGNED_CHAR, j, 0, MPI_COMM_WORLD);\
-      }\
-      else\
-        MPI_Recv(mat[i], mat_size, MPI_UNSIGNED_CHAR, cur_r, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\
+// its so cute now :)
+#define MPI_SYNC(mat, mat_size, rank, width) {\
+  if(rank == 0)\
+    for(uint32_t i=1; i<mat_size; ++i)\
+      MPI_Recv(mat[i], mat_size, MPI_UNSIGNED_CHAR, i/width, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\
+  else\
+    for(uint32_t i=0; i<RANKED_SIZE; ++i)\
+      MPI_Send(mat[i], mat_size, MPI_UNSIGNED_CHAR, i/width, 0, MPI_COMM_WORLD);\
 }
-// ^ lord forgive me
+// ^ lord have forgiven me
 
-#define MPI_BROADCAST(mat, mat_size, rank, source, mpi_size) {\
+#define MPI_BROADCAST(mat, mat_size, rank, source, mpi_size, width) {\
   if(rank == source) {\
     for(uint32_t i=0; i<mat_size; ++i)\
-      for(uint32_t j=0; j<mpi_size; ++j)\
-        if(j != source)\
-          MPI_Send(mat[i], mat_size, MPI_UNSIGNED_CHAR, j, 0, MPI_COMM_WORLD);\
+      if(i < source*width && i > (source+1)*width)\
+        MPI_Send(mat[i], mat_size, MPI_UNSIGNED_CHAR, i/width, 0, MPI_COMM_WORLD);\
   } else\
-    for(uint32_t i=0; i<mat_size; ++i)\
+    for(uint32_t i=0; i<RANKED_SIZE; ++i)\
       MPI_Recv(mat[i], mat_size, MPI_UNSIGNED_CHAR, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\
 }
 
